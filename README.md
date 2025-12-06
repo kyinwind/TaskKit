@@ -46,3 +46,13 @@ RewardEngine.shared.loadRewards(myRewards)
 ```
 EventCenter.shared.send(.openPage("Meditation"))
 ```
+
+# 包文件说明
+TaskKit
+ ├── Task.swift                // 任务定义
+ ├── TaskEvent.swift           // 事件类型
+ ├── EventCenter.swift         // 上报事件
+ ├── TaskEngine.swift          // 匹配任务并标记完成
+ ├── RewardEngine.swift        // 判断是否全部完成
+ ├── TaskStore.swift           // SwiftData 持久化用户完成状态
+ └── TaskKit.swift             // 对外 API （configure）
