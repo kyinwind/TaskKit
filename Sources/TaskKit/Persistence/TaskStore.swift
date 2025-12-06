@@ -19,14 +19,9 @@ public final class TaskStore {
     private init() {}
 
     // 初始化 SwiftData 容器
-    public func setup() {
-        let schema = Schema([TaskProgress.self])
-        // 指定存储路径
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let storeURL = documentsURL.appendingPathComponent("TaskKit.store")
-        let config = ModelConfiguration()
-
-        container = try! ModelContainer(for: schema, configurations: config)
+    // 外部注入 SwiftData 的 ModelContainer
+    public func setup(container: ModelContainer) {
+        self.container = container
     }
 
     // 查询某个 task 用户完成了吗
