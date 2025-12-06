@@ -26,14 +26,14 @@ public final class TaskStore {
         container = try! ModelContainer(for: schema, configurations: config)
     }
 
-    // 查询
+    // 查询某个 task 用户完成了吗
     public func isDone(_ id: String) -> Bool {
         let descriptor = FetchDescriptor<TaskProgress>(predicate: #Predicate { $0.taskId == id })
         let result = try? context.fetch(descriptor)
         return result?.first?.isDone ?? false
     }
 
-    // 修改
+    // 修改某个 task 用户已经完成
     public func markDone(_ id: String) {
         let descriptor = FetchDescriptor<TaskProgress>(predicate: #Predicate { $0.taskId == id })
         if let result = try? context.fetch(descriptor), let progress = result.first {
