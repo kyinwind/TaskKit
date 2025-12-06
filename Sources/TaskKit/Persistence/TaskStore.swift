@@ -1,0 +1,48 @@
+//
+//  TaskStore.swift
+//  TaskKit
+//
+//  Created by xuehui yang on 2025/12/6.
+//
+import SwiftData
+import Foundation
+
+@MainActor
+public final class TaskStore {
+    public static let shared = TaskStore()
+
+    public var container: ModelContainer!
+    public var context: ModelContext {
+        container.mainContext
+    }
+
+    private init() {}
+
+    // 初始化 SwiftData 容器
+    public func setup() {
+        let schema = Schema([TaskProgress.self])
+        let config = ModelConfiguration()
+
+        container = try! ModelContainer(for: schema, configurations: config)
+    }
+
+    // 查询
+    public func isDone(_ id: String) -> Bool {
+        let descriptor = FetchDescriptor<TaskProgress>(predicate: #Predicate { $0.taskId == id })
+        let result = try? context.fetch(descriptor)
+        return result?.first?.isDone ?? false
+    }
+
+    // 修改
+    public func markDone(_ id: String) {
+        let descriptor = FetchDescriptor<TaskProgress>(predicate: #Predicate { $0.taskId == id })
+        if let result = try? context.fetch(descriptor), let progress = result.first {
+            progress.isDone = true
+            progress.completedAt = Date()
+        } else {
+            context.insert(TaskProgress(taskId: id, isDone: true, completedAt: Date()))
+        }
+
+        try? context.save()
+    }
+}
