@@ -6,7 +6,8 @@
 
 使用方法：
 
-1、初始化 checkpoint 方法：
+1. 初始化 checkpoint 方法：
+```python
 @main
 struct MyApp: App {
     init() {
@@ -25,20 +26,23 @@ struct MyApp: App {
         }
     }
 }
-
-2、App 启动：
+```
+3. App 启动：
+```
 TaskStore.shared.setup()
 
 TaskEngine.shared.loadTasks(myTasks)
 RewardEngine.shared.loadRewards(myRewards)
-
-3、监听奖励：
+```
+3. 监听奖励：
+```
 .onReceive(NotificationCenter.default.publisher(for: .rewardUnlocked)) { note in
     if let reward = note.object as? Reward {
         print("奖励解锁: \(reward.title)")
     }
 }
-
-4、发送事件：
+```
+4. 发送事件：
+```
 EventCenter.shared.send(.openPage("Meditation"))
-
+```
