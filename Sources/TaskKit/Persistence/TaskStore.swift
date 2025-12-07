@@ -33,14 +33,23 @@ public final class TaskStore {
 
     // 修改某个 task 用户已经完成
     public func markDone(_ id: String) {
+        // 先查询是否存在，存在就更新，不存在就插入
+
         let descriptor = FetchDescriptor<TaskProgress>(predicate: #Predicate { $0.taskId == id })
         if let result = try? context.fetch(descriptor), let progress = result.first {
             progress.isDone = true
             progress.completedAt = Date()
         } else {
+            // 不存在就插入
+            print("不存在，插入")
             context.insert(TaskProgress(taskId: id, isDone: true, completedAt: Date()))
         }
+        do {
+            try context.save()
+        } catch {
+            let nsError = error as NSError
+            fatalError("保存失败：\(nsError), \(nsError.userInfo)")
+        }
 
-        try? context.save()
     }
 }

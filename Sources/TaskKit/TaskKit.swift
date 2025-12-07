@@ -9,10 +9,10 @@ import Foundation
 
 @MainActor
 public enum TaskKit {
-    public static var tasks: [Task] = []
+    public static var tasks: [AppTask] = []
 
     /// 初始化 TaskKit：设置可用任务
-    public static func configure(tasks: [Task]) {
+    public static func configure(tasks: [AppTask]) {
         self.tasks = tasks
         TaskEngine.shared.loadTasks(tasks)
     }
