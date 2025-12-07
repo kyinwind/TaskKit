@@ -9,8 +9,8 @@ import Foundation
 import SwiftData
 
 @Model
-public final class TaskProgress {
-    @Attribute(.unique) public var taskId: String
+public final class TaskProgress :Identifiable,ObservableObject{
+    public var taskId: String
     public var isDone: Bool
     public var completedAt: Date?
 

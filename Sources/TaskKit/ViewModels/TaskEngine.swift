@@ -6,36 +6,47 @@
 //
 import Foundation
 @MainActor
-public final class TaskEngine : @unchecked Sendable  {
+public final class TaskEngine: @unchecked Sendable {
     public static let shared = TaskEngine()
 
-    private var tasks: [Task] = []
+    private var tasks: [AppTask] = []
 
     private init() {
         EventCenter.shared.subscribe(handle(_:))
     }
 
-    public func loadTasks(_ tasks: [Task]) {
+    public func loadTasks(_ tasks: [AppTask]) {
         self.tasks = tasks
     }
 
     private func handle(_ event: TaskEvent) {
+        var changed = false
+
         for task in tasks {
-            if match(event, task.event) {
+            if !TaskStore.shared.isDone(task.id),
+               match(event, with: task.event) {
+
                 TaskStore.shared.markDone(task.id)
-                RewardEngine.shared.evaluate()
+                changed = true
             }
+        }
+
+        if changed {
+            RewardEngine.shared.evaluate()
         }
     }
 
-    private func match(_ event: TaskEvent, _ type: TaskEventType) -> Bool {
-        switch (event, type) {
-        case (.openPage, .openPage),
-             (.finishFeature, .finishFeature),
-             (.tapButton, .tapButton):
-            return true
+    private func match(_ event: TaskEvent, with taskEvent: TaskEvent) -> Bool {
+        switch (event, taskEvent) {
+        case let (.openPage(a), .openPage(b)):
+            return a == b
+        case let (.finishFeature(a), .finishFeature(b)):
+            return a == b
+        case let (.tapButton(a), .tapButton(b)):
+            return a == b
         default:
             return false
         }
     }
 }
+
