@@ -4,6 +4,9 @@
 //
 //  Created by xuehui yang on 2025/12/6.
 //
+
+import SwiftUI
+
 public enum TaskEvent: Codable {
     case openPage(String)
     case finishFeature(String)
@@ -50,7 +53,6 @@ public enum TaskEvent: Codable {
     }
 }
 
-
 @MainActor
 public final class EventCenter : @unchecked Sendable {
     public static let shared = EventCenter()
@@ -59,8 +61,11 @@ public final class EventCenter : @unchecked Sendable {
     private var subscribers: [(TaskEvent) -> Void] = []
 
     public func send(_ event: TaskEvent) {
-        for s in subscribers {
-            s(event)
+        // 🔥 保证回调一定在主线程
+        DispatchQueue.main.async {
+            for s in self.subscribers {
+                s(event)
+            }
         }
     }
 
