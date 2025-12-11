@@ -6,14 +6,16 @@
 //
 import Foundation
 @MainActor
-public final class TaskEngine: @unchecked Sendable {
+public final class TaskEngine {
     public static let shared = TaskEngine()
 
     private var tasks: [AppTask] = []
 
     private init() {
-        EventCenter.shared.subscribe(handle(_:))
-    }
+            EventCenter.shared.subscribe { [weak self] event in
+                self?.handle(event)
+            }
+        }
 
     public func loadTasks(_ tasks: [AppTask]) {
         self.tasks = tasks

@@ -4,9 +4,6 @@
 //
 //  Created by xuehui yang on 2025/12/6.
 //
-
-import Foundation
-
 public enum TaskEvent: Codable {
     case openPage(String)
     case finishFeature(String)
@@ -54,44 +51,20 @@ public enum TaskEvent: Codable {
 }
 
 
-// MARK: - Subscriber Wrapper（弱引用）
-private class Subscriber {
-    weak var object: AnyObject?
-    let handler: (TaskEvent) -> Void
-
-    init(object: AnyObject, handler: @escaping (TaskEvent) -> Void) {
-        self.object = object
-        self.handler = handler
-    }
-}
-
-
-// MARK: - 最终版 EventCenter
 @MainActor
-public final class EventCenter: @unchecked Sendable {
+public final class EventCenter : @unchecked Sendable {
     public static let shared = EventCenter()
     private init() {}
 
-    private var subscribers: [Subscriber] = []
+    private var subscribers: [@MainActor (TaskEvent) -> Void] = []
 
-    /// 订阅事件（自动弱引用，不会泄漏）
-    public func subscribe(_ owner: AnyObject,
-                          handler: @escaping (TaskEvent) -> Void) {
-
-        subscribers.append(Subscriber(object: owner, handler: handler))
+    public func send(_ event: TaskEvent) {
+        for handler in subscribers {
+            handler(event)
+        }
     }
 
-    /// 分发事件（保证一定在主线程执行 subscribers）
-    public func send(_ event: TaskEvent) {
-
-        // 清理已经释放的订阅者
-        subscribers.removeAll { $0.object == nil }
-
-        // 保证所有事件处理在主线程上
-        DispatchQueue.main.async {
-            for s in self.subscribers {
-                s.handler(event)
-            }
-        }
+    public func subscribe(_ handler: @escaping @MainActor @Sendable (TaskEvent) -> Void) {
+        subscribers.append(handler)
     }
 }

@@ -13,17 +13,24 @@ public extension Notification.Name {
 public final class RewardEngine {
     public static let shared = RewardEngine()
 
-    private var rewards: [Reward] = []
+    public var rewards: [AppReward] = []
 
-    public func loadRewards(_ rewards: [Reward]) {
+    public func loadRewards(_ rewards: [AppReward]) {
         self.rewards = rewards
     }
 
     public func evaluate() {
         for reward in rewards {
+            // 已获得，不需要重复触发
+            if RewardStore.shared.has(reward.id) {
+                continue
+            }
             switch reward.condition {
             case .allTasksDone(let ids):
                 if ids.allSatisfy({ TaskStore.shared.isDone($0) }) {
+                    // 记录
+                    RewardStore.shared.markUnlocked(reward.id)
+                    // 发通知
                     NotificationCenter.default.post(name: .rewardUnlocked, object: reward)
                 }
             }
