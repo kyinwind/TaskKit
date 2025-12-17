@@ -13,7 +13,7 @@ public final class RewardStore {
     private init() { load() }
 
     private let key = "reward_store"
-    private(set) var unlocked: Set<String> = []
+    public private(set) var unlocked: Set<String> = []
 
     public func markUnlocked(_ id: String) {
         if unlocked.insert(id).inserted {
