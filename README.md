@@ -1,9 +1,17 @@
 # TaskKit
 
-为用户设置 app 的完成任务，并记录用户完成情况
+介绍：
+当我们的app需要设置一些任务，用来引导用户完成这些学习任务，逐步熟悉app功能的时候，可以考虑使用TaskKit。
+当需要针对用户完成任务的情况，为用户划分不同level的时候，也可以考虑使用TaskKit。
+
+主要功能：
+1、支持用户在app初始化的时候定义引导任务，以及激活的奖励
+2、当任务完成时，自动写入UserDefaults
+3、当一个或多个任务完成，触发解锁奖励时，NotificationCenter.default.post(name: .rewardUnlocked, object: reward)，通知主app
+4、提供一个展示任务和奖励的view：CheckListView
 
 2025-12-06:发布 0.1 版
-
+2025-12-17:发布0.2版
 使用方法：
 
 1. 初始化 checkpoint 方法
