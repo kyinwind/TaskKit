@@ -167,6 +167,7 @@ struct UserLevelView: View {
     }
 }
 ```
+![（示例）]("shot.png")
 # 包文件说明
 ```
 TaskKit 配置应用的初始化入口
