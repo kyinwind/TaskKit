@@ -4,7 +4,7 @@
 //
 //  Created by xuehui yang on 2025/12/6.
 //
-public enum TaskEvent: Codable {
+public enum TaskEvent: Codable , Sendable {
     case openPage(String)
     case finishFeature(String)
     case tapButton(String)
@@ -50,21 +50,30 @@ public enum TaskEvent: Codable {
     }
 }
 
-
 @MainActor
-public final class EventCenter : @unchecked Sendable {
+public final class EventCenter {
+
     public static let shared = EventCenter()
     private init() {}
 
-    private var subscribers: [@MainActor (TaskEvent) -> Void] = []
+    private var subscribers: [(TaskEvent) -> Void] = []
 
-    public func send(_ event: TaskEvent) {
+    /// 外部任何线程都可以调用
+    public nonisolated func send(_ event: TaskEvent) {
+        let eventCopy = event   // ⭐ 关键
+        Task { @MainActor in
+            self.dispatch(eventCopy)
+        }
+    }
+
+
+    private func dispatch(_ event: TaskEvent) {
         for handler in subscribers {
             handler(event)
         }
     }
 
-    public func subscribe(_ handler: @escaping @MainActor @Sendable (TaskEvent) -> Void) {
+    public func subscribe(_ handler: @escaping (TaskEvent) -> Void) {
         subscribers.append(handler)
     }
 }
