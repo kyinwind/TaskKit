@@ -111,7 +111,6 @@ public struct ChecklistView: View {
 
         public var body: some View {
             HStack(spacing: 12) {
-                // 如果没有相应图片资源，请确保 assets 中存在 reward.iconName 或换成 system image
                 Image(reward.iconName)
                     .resizable()
                     .frame(width: 50, height: 50)
