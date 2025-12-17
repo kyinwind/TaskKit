@@ -9,47 +9,62 @@ import Foundation
 
 @MainActor
 public final class TaskStore {
+
     public static let shared = TaskStore()
+    private init() { load() }
 
-    public var container: ModelContainer!
-    public var context: ModelContext {
-        container.mainContext
-    }
+    private let key = "task_progress_store"
 
-    private init() {}
+    // taskId -> completedAt
+    private var completed: [String: Date] = [:]
 
-    // 初始化 SwiftData 容器
-    // 外部注入 SwiftData 的 ModelContainer
-    public func setup(container: ModelContainer) {
-        self.container = container
-    }
+    // MARK: - Public API
 
-    // 查询某个 task 用户完成了吗
     public func isDone(_ id: String) -> Bool {
-        let descriptor = FetchDescriptor<TaskProgress>(predicate: #Predicate { $0.taskId == id })
-        let result = try? context.fetch(descriptor)
-        return result?.first?.isDone ?? false
+        completed[id] != nil
     }
 
-    // 修改某个 task 用户已经完成
+    public func completedAt(_ id: String) -> Date? {
+        completed[id]
+    }
+
     public func markDone(_ id: String) {
-        // 先查询是否存在，存在就更新，不存在就插入
-
-        let descriptor = FetchDescriptor<TaskProgress>(predicate: #Predicate { $0.taskId == id })
-        if let result = try? context.fetch(descriptor), let progress = result.first {
-            progress.isDone = true
-            progress.completedAt = Date()
-        } else {
-            // 不存在就插入
-            print("不存在，插入")
-            context.insert(TaskProgress(taskId: id, isDone: true, completedAt: Date()))
-        }
-        do {
-            try context.save()
-        } catch {
-            let nsError = error as NSError
-            fatalError("保存失败：\(nsError), \(nsError.userInfo)")
-        }
-
+        guard completed[id] == nil else { return }
+        completed[id] = Date()
+        save()
     }
+
+    public func reset(_ id: String) {
+        if completed.removeValue(forKey: id) != nil {
+            save()
+        }
+    }
+
+    public func resetAll() {
+        completed.removeAll()
+        save()
+    }
+
+    // MARK: - Persistence
+
+    private func save() {
+        let data = completed.mapValues { $0.timeIntervalSince1970 }
+        UserDefaults.standard.set(data, forKey: key)
+    }
+
+    private func load() {
+        guard
+            let raw = UserDefaults.standard.dictionary(forKey: key) as? [String: TimeInterval]
+        else { return }
+
+        completed = raw.mapValues { Date(timeIntervalSince1970: $0) }
+    }
+    
+    // 用于从原来的swfitdata方案迁移过来
+    public func migrateDone(taskId: String, completedAt: Date) {
+        guard completed[taskId] == nil else { return }
+        completed[taskId] = completedAt
+        save()
+    }
+
 }

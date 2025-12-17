@@ -11,15 +11,9 @@
 @main
 struct MyApp: App {
     init() {
-            let schema = Schema([
-                TaskProgress.self,   // ⭐ 加入 TaskKit 的 entity
-            ])
-        do {
-            modelContainer = try ModelContainer(for: schema)
-            modelContainer.mainContext.autosaveEnabled = false
-        } catch {
-            fatalError("初始化ModelContainer失败。\(URL.applicationSupportDirectory.path(percentEncoded: false))")
-        }
+        //原有代码
+        。。。
+        //初始化 TaskKit
         initTaskKit()
     }
 
@@ -31,9 +25,7 @@ struct MyApp: App {
 }
 
 func initTaskKit() {
-    //初始化 package 的持久化数据库
-    TaskStore.shared.setup(container: modelContainer)
-    //初始化 app 有多少 checkpoint
+    //初始化 app 有多少 task
     TaskKit.configure(
         tasks: [
             AppTask(
@@ -80,6 +72,7 @@ func initTaskKit() {
             ),
         ]
     )
+    //有多少奖励，以及奖励和task对应关系
     let appRewards = [
         Reward(
             id: "r1",
@@ -173,9 +166,8 @@ struct UserLevelView: View {
 TaskKit 配置应用的初始化入口
 AppTask 定义应用中需要引导用户完成的任务
 Reward 定义完成任务后可以获得的奖励
-TaskProgress 记录用户完成任务的情况，这个是需要持久化的，需要在外部app的持久化数据库中加入这个entity
 RewardStore 封装了奖励的加载和保存
-TaskStore 封装了任务的完成、查询、setup等逻辑
+TaskStore 封装了任务的完成、查询等逻辑
 EventCenter 封装了事件的发送、订阅逻辑，定义了事件的多种类型
 RewardEngine 封装了奖励的解锁逻辑,解锁奖励，并通知外部app
 TaskEngine 封装了任务的完成逻辑，完成任务后更新TaskProgress,并计算是否解锁奖励
