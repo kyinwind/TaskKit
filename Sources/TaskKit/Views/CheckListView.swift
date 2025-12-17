@@ -63,7 +63,7 @@ public struct ChecklistView: View {
                     }
                 }
             }
-            .listStyle(.insetGrouped)
+            .platformListStyle()
 
             if let remarks = remarks {
                 Text(remarks)
@@ -112,15 +112,15 @@ public struct ChecklistView: View {
         public var body: some View {
             HStack(spacing: 12) {
                 // 如果没有相应图片资源，请确保 assets 中存在 reward.iconName 或换成 system image
-                if UIImage(named: reward.iconName) != nil {
-                    Image(reward.iconName)
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .cornerRadius(10)
-                } else {
-                    Image(systemName: "gift.fill")
-                        .frame(width: 28, height: 28)
-                }
+                Image(reward.iconName)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .cornerRadius(10)
+                    .overlay {
+                        Image(systemName: "gift.fill")
+                            .opacity(0.6)
+                    }
+
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(reward.title.isEmpty ? reward.name : reward.title)
@@ -134,6 +134,17 @@ public struct ChecklistView: View {
             }
             .padding(.vertical, 4)
         }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func platformListStyle() -> some View {
+        #if os(iOS)
+        self.listStyle(.insetGrouped)
+        #else
+        self.listStyle(.inset)
+        #endif
     }
 }
 
