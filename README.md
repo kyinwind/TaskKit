@@ -26,8 +26,7 @@ struct MyApp: App {
 
 func initTaskKit() {
     //初始化 app 有多少 task
-    TaskKit.configure(
-        tasks: [
+    let tasks = [
             AppTask(
                 id: "create_gongke",
                 title: "创建功课计划",
@@ -71,7 +70,7 @@ func initTaskKit() {
                 rewardId: "海量佛学视频下载链接"
             ),
         ]
-    )
+
     //有多少奖励，以及奖励和task对应关系
     let appRewards = [
         Reward(
@@ -104,8 +103,9 @@ func initTaskKit() {
             ])
         )
     ]
-    RewardEngine.shared.loadRewards(appRewards)
-
+    //配置 TaskKit
+    TaskKit.configure(tasks:tasks,rewards: appRewards)
+        
 }
 
 ```
