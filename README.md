@@ -130,14 +130,54 @@ func initTaskKit() {
 EventCenter.shared.send(.finishFeature("create_gongke"))
 ```
 
+5. 展示任务列表：
+```
+//显示一个代表当前用户等级的图片，点击后进入CheckListView
+struct UserLevelView: View {
+    @State var userLevel: String = "r0"
+    var body: some View {
+        let title = "完成 app 使用体验，解锁奖励"
+        let remarks = "奖励包括：佛学知识测试题，资料、佛学小游戏等"
+        
+        NavigationLink(
+            destination: ChecklistView(
+                title:title,
+                tasks: TaskKit.tasks,
+                remarks: remarks,
+                rewards: TaskKit.rewards
+            )
+        ) {
+            Image(userLevel)  //假设已经存在以用户的level命名的图片在assets
+                .resizable()
+                .foregroundColor(Color.blue)
+                .frame(width:45,height: 45)
+                .cornerRadius(20)
+        }
+        
+        .onAppear(){
+            let unlocked = RewardStore.shared.unlocked
+            var maxUnlocked: String? {
+                // 1. Set 转数组
+                let sortedArray = unlocked.sorted()
+                // 2. 取最后一个元素（升序排序后最后一个是最大的）
+                return sortedArray.last
+            }
+            userLevel = maxUnlocked ?? "r0"
+        }
+    }
+}
+```
 # 包文件说明
 ```
-TaskKit
- ├── Task.swift                // 任务定义
- ├── TaskEvent.swift           // 事件类型
- ├── EventCenter.swift         // 上报事件
- ├── TaskEngine.swift          // 匹配任务并标记完成
- ├── RewardEngine.swift        // 判断是否全部完成
- ├── TaskStore.swift           // SwiftData 持久化用户完成状态
- └── TaskKit.swift             // 对外 API （configure）
+TaskKit 配置应用的初始化入口
+AppTask 定义应用中需要引导用户完成的任务
+Reward 定义完成任务后可以获得的奖励
+TaskProgress 记录用户完成任务的情况，这个是需要持久化的，需要在外部app的持久化数据库中加入这个entity
+RewardStore 封装了奖励的加载和保存
+TaskStore 封装了任务的完成、查询、setup等逻辑
+EventCenter 封装了事件的发送、订阅逻辑，定义了事件的多种类型
+RewardEngine 封装了奖励的解锁逻辑,解锁奖励，并通知外部app
+TaskEngine 封装了任务的完成逻辑，完成任务后更新TaskProgress,并计算是否解锁奖励
+CheckListView   封装了任务和奖励的展示逻辑，外部app可以基于此view展示任务列表
+
 ```
